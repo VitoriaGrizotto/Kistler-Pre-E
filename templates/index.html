@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Curvas Kistler maXYmos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Análise de Curvas Kistler maXYmos</h1>
+        <div class="upload-section">
+            <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+            <button id="uploadButton" class="btn btn-primary">Upload de Arquivo CSV</button>
+            <span id="loadingMessage" class="loading-spinner" style="display: none;">Processando dados...</span>
+        </div>
+    </header>
+<main class="container">
+        <div id="resultInfoPanel" class="panel result-info-panel" style="display: none;">
+            <h2>Informações do Resultado</h2>
+            <p><strong>Data:</strong> <span id="infoDate"></span></p>
+            <p><strong>Hora:</strong> <span id="infoTime"></span></p>
+            <p><strong>Resultado Final:</strong> <span id="infoTotalResult"></span></p>
+            <p><strong>Número de Série da Peça:</strong> <span id="infoPartSerial"></span></p>
+            <p><strong>Nome do Programa:</strong> <span id="infoProgramName"></span></p>
+        </div>
+<div id="chartPanel" class="panel chart-panel" style="display: none;">
+            <h2>Curva de Prensagem (Força vs. Deslocamento)</h2>
+            <div id="pressingCurveChart" class="chart-container"></div>
+            <div id="eoLegend" class="eo-legend">
+            </div>
+        </div>
+    </main>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
