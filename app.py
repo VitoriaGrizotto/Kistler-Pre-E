@@ -8,7 +8,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-
 def parse_kistler_csv(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
