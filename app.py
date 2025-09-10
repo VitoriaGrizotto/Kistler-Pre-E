@@ -4,7 +4,7 @@ from flask import Flask, request, render_template, jsonify
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploaded_files'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 #Definindo o tamanho maximo do arquivo
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 

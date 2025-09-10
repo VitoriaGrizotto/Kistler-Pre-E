@@ -71,7 +71,7 @@ function plotMeasuringCurve(curveData, evaluationObjects) {
 const traces = [traceCurve];
         const shapes = [];
         const annotations = [];
-        let eoLegendHtml = '<h3>Limites de Avaliação (EOs):</h3>';
+        let eoLegendHtml = '';
 const eoColors = {
             'LINE-X': 'orange',
             'NO-PASS': 'red',
