@@ -18,6 +18,10 @@ def parse_kistler_csv(file_path):
         "measuring_curve": {"X": [], "Y": []}
     }
 
+    print("\n--- INÍCIO DO CONTEÚDO DO ARQUIVO (primeiros 500 chars) ---")
+    print(content[:500])
+    print("--- FIM DO CONTEÚDO DO ARQUIVO (primeiros 500 chars) ---\n")
+
     result_info_match = re.search(r'Result information\n(.*?)(?=\n\n|\nProcess values)', content, re.DOTALL)
     if result_info_match:
         info_lines = result_info_match.group(1).strip().split('\n')
@@ -25,26 +29,93 @@ def parse_kistler_csv(file_path):
             if ';' in line:
                 key, value = line.split(';', 1)
                 data["result_info"][key.strip()] = value.strip()
-
     essential_keys = ["Date", "Time", "Total result", "Part serial number", "Measuring program name"]
     for key in essential_keys:
         data["result_info"][key] = data["result_info"].get(key, "N/A")
 
-    eo_settings_match = re.search(r'Evaluation objects settings\n(.*?)(?=\n\n|\nSwitch signal settings)', content, re.DOTALL)
-    if eo_settings_match:
-        eo_lines = eo_settings_match.group(1).strip().split('\n')
-        if len(eo_lines) > 1:
-            header_line = eo_lines[0]
-            headers = [h.strip() for h in header_line.split(';') if h.strip()]
 
-            for line in eo_lines[1:]:
+    print("\n--- INICIANDO BUSCA POR 'Evaluation objects settings' ---")
+    
+    start_keyword = "Evaluation objects settings"
+    end_keywords = ["Switch signal settings", "Device information", "Measuring curve"] 
+
+    start_idx = -1
+    content_lines = content.split('\n')
+    for i, line in enumerate(content_lines):
+        if line.strip().startswith(start_keyword):
+            start_idx = i
+            print(f"DEBUG: '{start_keyword}' encontrado na linha: {i+1}")
+            break
+    
+    if start_idx != -1:
+        end_idx = -1
+        for i in range(start_idx + 1, len(content_lines)):
+            if content_lines[i].strip() == "": 
+                if i + 1 < len(content_lines) and content_lines[i+1].strip() == "":
+                    end_idx = i
+                    print(f"DEBUG: Duas linhas em branco encontradas após '{start_keyword}' na linha {i+1}.")
+                    break
+            
+            found_end_keyword = False
+            for keyword in end_keywords:
+                if content_lines[i].strip().startswith(keyword):
+                    end_idx = i
+                    print(f"DEBUG: Palavra-chave '{keyword}' encontrada após '{start_keyword}' na linha {i+1}.")
+                    found_end_keyword = True
+                    break
+            if found_end_keyword:
+                break
+        
+        if end_idx == -1:
+             print("DEBUG: Nenhum final explícito para 'Evaluation objects settings' encontrado. Usando o resto do arquivo.")
+             eo_block_content = "\n".join(content_lines[start_idx:])
+        else:
+            eo_block_content = "\n".join(content_lines[start_idx:end_idx])
+
+        print(f"DEBUG: Conteúdo bruto do bloco EO:\n{eo_block_content[:500]}...")
+        
+        eo_lines = eo_block_content.strip().split('\n')
+        if len(eo_lines) > 1: 
+            header_line = eo_lines[0]
+            
+        
+            headers = [h.strip() for h in header_line.split(';') if h.strip()]
+            start_data_line = 1 # Os dados começam da próxima linha
+
+            print(f"Cabeçalhos dos EOs: {headers}") # Debug 3
+
+            for line_num, line in enumerate(eo_lines[start_data_line:], start=1):
                 parts = [p.strip() for p in line.split(';')]
-                if len(parts) > 1 and parts[0].startswith('EO-') and parts[1] != 'OFF':
-                    eo_data = {}
-                    for i, header in enumerate(headers):
-                        if i < len(parts):
-                            eo_data[header] = parts[i]
-                    data["evaluation_objects"].append(eo_data)
+                print(f"Linha EO {line_num} partes: {parts}") # Debug 4
+                
+                if len(parts) > 1: 
+                    is_eo = parts[0].startswith('EO-')
+                    reaction_value = parts[1]
+                    is_not_off = reaction_value != 'OFF'
+                    print(f"  Verificando Linha {line_num}: is_eo={is_eo}, reaction_value='{reaction_value}', is_not_off={is_not_off}") # Debug 5
+
+                    if is_eo and is_not_off: 
+                        eo_data = {}
+                        for i, header in enumerate(headers):
+                            if i < len(parts): 
+                                value = parts[i]
+                                if header in ['XMin', 'XMax', 'YMin', 'YMax', 'Y', 'X'] and isinstance(value, str) and ',' in value:
+                                    value = value.replace(',', '.')
+                                eo_data[header] = value
+                        eo_data['EO_Identifier'] = parts[0]
+                        data["evaluation_objects"].append(eo_data)
+                        print(f"  EO adicionado: {eo_data['EO_Identifier']}") # Debug 6
+                    else:
+                        print(f"  Linha EO {line_num} ignorada devido à condição.") # Debug 7
+                else:
+                    print(f"  Linha EO {line_num} ignorada: Poucas partes ({len(parts)})") # Debug 8
+        else:
+            print(f"DEBUG: Seção '{start_keyword}' encontrada, mas sem linhas de dados após o cabeçalho.")
+    else:
+        print(f"--- FALHA: A palavra-chave '{start_keyword}' não foi encontrada no arquivo. ---")
+    
+    print("--- FIM DA BUSCA POR 'Evaluation objects settings' ---\n")
+
 
     measuring_curve_start = content.find('Measuring curve')
     if measuring_curve_start != -1:
@@ -62,7 +133,8 @@ def parse_kistler_csv(file_path):
                             data["measuring_curve"]["Y"].append(float(parts[2].replace(',', '.')))
                         except (ValueError, IndexError):
                             continue
-
+    
+    print(f"--- DEBUG APP.PY: evaluation_objects final: {len(data['evaluation_objects'])} EOs ---")
     return data
 
 
