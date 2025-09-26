@@ -24,14 +24,34 @@
             <p><strong>Resultado Final:</strong> <span id="infoTotalResult"></span></p>
             <p><strong>Número de Série da Peça:</strong> <span id="infoPartSerial"></span></p>
             <p><strong>Nome do Programa:</strong> <span id="infoProgramName"></span></p>
+            <p><strong>Entry (EO-01):</strong> <span id="infoEntry"></span></p> <!-- NOVO CAMPO -->
         </div>
-<div id="chartPanel" class="panel chart-panel" style="display: none;">
+
+        <div id="processValuesCurveRelatedPanel" class="panel process-values-panel" style="display: none;">
+            <h2>Valores do Processo - Curva</h2>
+            <div id="processValuesCurveRelatedContent">
+                <!-- O conteúdo será preenchido via JavaScript -->
+            </div>
+        </div>
+
+        <div id="evaluationObjectSettingsPanel" class="panel evaluation-objects-panel" style="display: none;">
+            <h2>Configurações dos Objetos de Avaliação (EOs)</h2>
+            <div id="evaluationObjectSettingsContent">
+                <!-- O conteúdo será preenchido via JavaScript -->
+            </div>
+        </div>
+
+        <div id="chartPanel" class="panel chart-panel" style="display: none;">
             <h2>Curva de Prensagem (Força vs. Deslocamento)</h2>
             <div id="pressingCurveChart" class="chart-container"></div>
             <div id="eoLegend" class="eo-legend">
             </div>
         </div>
     </main>
+   <!-- Nova div para a assinatura fixa na tela -->
+    <!-- <div class="app-signature">
+        <p>Desenvolvido por Vitória Grizotto &ndash; Versão 1.2025</p>
+    </div> -->
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>

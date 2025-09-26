@@ -144,7 +144,6 @@ header h1 {
     height: 16px;
     border-radius: 4px;
 }
-/* No seu style.css */
 .eo-legend {
     margin-top: 20px;
     padding: 10px;
@@ -162,7 +161,7 @@ header h1 {
 .eo-color-box {
     width: 20px;
     height: 10px;
-    border: 1px solid #666; /* Borda para visibilidade de cores claras */
+    border: 1px solid #667;
     margin-right: 8px;
     display: inline-block;
 }
@@ -181,8 +180,37 @@ header h1 {
     flex-direction: column;
     gap: 8px;
 }
+.eo-legend-item {
+    display: flex;
+    align-items: flex-start; 
+    margin-bottom: 5px;
+    gap: 8px; 
+    padding: 6px;
+    border-radius: 6px;
+    background: rgba(250,250,250,0.9);
+    border: 1px solid #eee;
+}
 
-/* item da legenda - mantém mesmo layout do seu CSS */
+.eo-legend-item input[type="checkbox"] {
+    margin-top: 4px; 
+    accent-color: var(--primary); 
+    flex-shrink: 0; 
+}
+
+.eo-legend-item label {
+    cursor: pointer; 
+}
+
+.eo-color-box {
+    width: 18px; 
+    height: 14px; 
+    border: 1px solid #667; 
+    margin-right: 8px; 
+    display: inline-block;
+    flex-shrink: 0;
+    border-radius: 3px;
+}
+
 .eo-legend-item {
     display: flex;
     align-items: flex-start;
@@ -193,28 +221,23 @@ header h1 {
     border: 1px solid #eee;
 }
 
-/* caixa de cor do EO */
 .eo-color-box {
     width: 18px;
     height: 14px;
     border-radius: 3px;
-    border: 1px solid #666;
+    border: 1px solid #667;
     flex-shrink: 0;
 }
-
-/* status badges - inline */
 .eo-status {
     font-weight: 700;
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 0.85rem;
 }
-
 .eo-status.ok { color: green; }
 .eo-status.nok { color: red; }
 .eo-status.warn { color: orange; }
 
-/* Spinner de carregamento */
 .loading-spinner {
     display: inline-block;
     width: 20px;
@@ -227,6 +250,62 @@ header h1 {
     margin-left: 10px;
     vertical-align: middle;
 }
+
+
+.process-values-panel {
+    display: none; 
+}
+
+#processValuesCurveRelatedContent {
+    padding: 0.5rem;
+}
+
+#processValuesCurveRelatedContent strong {
+    color: var(--primary); 
+}
+.process-values-panel,
+.evaluation-objects-panel {
+    display: none; 
+}
+
+#processValuesCurveRelatedContent,
+#evaluationObjectSettingsContent { 
+    padding: 0.5rem;
+}
+
+#processValuesCurveRelatedContent strong,
+#evaluationObjectSettingsContent strong { 
+    color: var(--primary); 
+}
+
+.eo-settings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.9em;
+}
+
+.eo-settings-table th,
+.eo-settings-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.eo-settings-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: var(--dark);
+}
+
+.eo-settings-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.eo-settings-table tr:hover {
+    background-color: #f1f1f1;
+}
+
 
 @keyframes spin {
     to { -webkit-transform: rotate(360deg); }
