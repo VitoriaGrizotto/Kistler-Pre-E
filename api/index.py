@@ -3,7 +3,7 @@ import re
 from flask import Flask, request, render_template, jsonify
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploaded_files'
+app.config['UPLOAD_FOLDER'] = '/tmp/uploaded_files'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -374,6 +374,3 @@ def upload_file():
         if os.path.exists(filepath):
             os.remove(filepath)
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
