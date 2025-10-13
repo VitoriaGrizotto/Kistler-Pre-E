@@ -73,52 +73,48 @@ def parse_kistler_csv(file_path):
         data["result_info"][key] = data["result_info"].get(key, "N/A")
 
     # --- NEW: Extract 'Entry' from "Process values - EO related"
-    entry_value = "N/A" # Default if not found
-    
-    # Find the block "Process values - EO related"
-    # It starts with "Process values - EO related" and ends before the next major section
-    pv_eo_related_block_match = re.search(
-        r'Process values - EO related\n(.*?)(?=\n\n|\nEvaluation objects settings|\nMeasuring curve)', 
-        content, 
-        re.DOTALL
-    )
+    data["result_info"]["Entry"] = "N/A" # Default if not found
 
+    # Find the block "Process values - EO related"
+    # It starts with "Process values - EO related" and ends before the next major section (e.g., "Evaluation objects settings")
+    pv_eo_related_block_match = re.search(
+        r"Process values - EO related\n(.*?)(?=\n\nEvaluation objects settings|\n\nSwitch signal settings|\n\nDevice information)",
+        content,
+        re.DOTALL # re.S is equivalent to re.DOTALL, allows . to match newlines
+    )
+    
     if pv_eo_related_block_match:
         block_content = pv_eo_related_block_match.group(1).strip()
-        lines = block_content.split('\n')
+        lines = [line.strip() for line in block_content.splitlines() if line.strip()]
 
-        if len(lines) >= 2: # Expect at least header and one data line
-            header_line_str = lines[0] # e.g., "Result;Entry;Exit;XMIN-X;..."
-            headers = [h.strip() for h in header_line_str.split(';')]
-            
+        if len(lines) >= 3: # Need at least header, units, and one EO line
+            # First line is the header: "Result;Entry;Exit;XMIN-X..."
+            headers = [h.strip() for h in lines[0].split(';')]
+
             try:
-                # Find the index of the 'Entry' column
-                entry_col_index = headers.index('Entry')
+                entry_col_index = headers.index("Entry")
             except ValueError:
                 entry_col_index = -1 # 'Entry' header not found
 
             if entry_col_index != -1:
-                # Iterate through data lines to find EO-01
-                # The format is `EO-XX;Result;Entry;Exit;...`
-                for i in range(1, len(lines)): # Start from second line (data lines)
-                    line = lines[i]
-                    parts = [p.strip() for p in line.split(';')]
-                    
-                    if parts and parts[0] == 'EO-01':
+                # Iterate through data lines starting from the third line (index 2)
+                # which correspond to EO-01, EO-02, etc.
+                for line_idx, line in enumerate(lines[2:]):
+                    # We are specifically looking for EO-01 for now, which is the first data line after headers and units
+                    if line_idx == 0 and line.startswith("EO-01"): 
+                        parts = [p.strip() for p in line.split(';')]
                         if len(parts) > entry_col_index:
                             raw_entry = parts[entry_col_index]
                             if raw_entry:
-                                entry_value = raw_entry.replace(',', '.')
-                                # Optionally try to convert to float to validate, but keep as string if not a valid float
+                                # Convert comma to dot for float parsing
+                                entry_value_str = raw_entry.replace(",", ".")
                                 try:
-                                    entry_value = str(float(entry_value)) 
+                                    # Ensure it's a valid number and store as string
+                                    data["result_info"]["Entry"] = str(float(entry_value_str))
+                                    break # Found EO-01 Entry, no need to check other EOs
                                 except ValueError:
-                                    pass # Keep as is if not a valid number
-                            break # Found EO-01 entry, stop searching
-    
-    data["result_info"]["Entry"] = entry_value
-
-
+                                    # Not a valid number, keep default "N/A"
+                                    pass
     # --- Process values - curve related
     process_values_curve_related_match = re.search(
         r'Process values - curve related\n(.*?)(?=\n\n|\nProcess values - EO related|\nEvaluation objects settings|\nMeasuring curve)',
