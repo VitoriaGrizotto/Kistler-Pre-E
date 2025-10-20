@@ -35,7 +35,6 @@ def _safe_parse_value(value_str):
     if not value_str:
         return {'value': None, 'unit': None}
 
-    # Regex to find a number (integer or float with comma/dot) followed by an optional unit
     match = re.match(r'([-+]?\d+(?:[.,]\d+)?)\s*(\S*)', value_str)
     if match:
         num_str = match.group(1).replace(',', '.')
@@ -72,23 +71,19 @@ def parse_kistler_csv(file_path):
     for key in essential_keys:
         data["result_info"][key] = data["result_info"].get(key, "N/A")
 
-    # --- NEW: Extract 'Entry' from "Process values - EO related"
     data["result_info"]["Entry"] = "N/A" # Default if not found
 
-    # Find the block "Process values - EO related"
-    # It starts with "Process values - EO related" and ends before the next major section (e.g., "Evaluation objects settings")
     pv_eo_related_block_match = re.search(
         r"Process values - EO related\n(.*?)(?=\n\nEvaluation objects settings|\n\nSwitch signal settings|\n\nDevice information)",
         content,
-        re.DOTALL # re.S is equivalent to re.DOTALL, allows . to match newlines
+        re.DOTALL 
     )
     
     if pv_eo_related_block_match:
         block_content = pv_eo_related_block_match.group(1).strip()
         lines = [line.strip() for line in block_content.splitlines() if line.strip()]
 
-        if len(lines) >= 3: # Need at least header, units, and one EO line
-            # First line is the header: "Result;Entry;Exit;XMIN-X..."
+        if len(lines) >= 3: 
             headers = [h.strip() for h in lines[0].split(';')]
 
             try:
@@ -97,23 +92,18 @@ def parse_kistler_csv(file_path):
                 entry_col_index = -1 # 'Entry' header not found
 
             if entry_col_index != -1:
-                # Iterate through data lines starting from the third line (index 2)
-                # which correspond to EO-01, EO-02, etc.
                 for line_idx, line in enumerate(lines[2:]):
-                    # We are specifically looking for EO-01 for now, which is the first data line after headers and units
                     if line_idx == 0 and line.startswith("EO-01"): 
                         parts = [p.strip() for p in line.split(';')]
                         if len(parts) > entry_col_index:
                             raw_entry = parts[entry_col_index]
                             if raw_entry:
-                                # Convert comma to dot for float parsing
                                 entry_value_str = raw_entry.replace(",", ".")
                                 try:
-                                    # Ensure it's a valid number and store as string
+                                   
                                     data["result_info"]["Entry"] = str(float(entry_value_str))
-                                    break # Found EO-01 Entry, no need to check other EOs
+                                    break 
                                 except ValueError:
-                                    # Not a valid number, keep default "N/A"
                                     pass
     # --- Process values - curve related
     process_values_curve_related_match = re.search(
@@ -253,7 +243,7 @@ def parse_kistler_csv(file_path):
                     eo_result["x_cross"] = crossed_inside[0]
                     eo_result["y_cross"] = crossed_inside[1]
                 elif crossed_outside:
-                    eo_result["evaluation_result"] = "NOK_OUT_OF_RANGE"
+                    eo_result["evaluation_result"] = "NOK"
                     eo_result["evaluation_reason"] = f"Reached YMin ({y_min}) but outside X-range [{x_min},{x_max}]"
                     eo_result["x_cross"] = crossed_outside[0]
                     eo_result["y_cross"] = crossed_outside[1]

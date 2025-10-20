@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const traces = [traceCurve];
         const shapes = [];
-        annotations = []; // Certifique-se de que annotations seja redefinido
+        annotations = []; 
         let eoLegendHtml = '';
 
         currentPlotData.eoPlotIndices = {};
