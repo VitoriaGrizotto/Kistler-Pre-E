@@ -23,11 +23,6 @@ def _safe_float(value):
         return None
 
 def _safe_parse_value(value_str):
-    """
-    Parses a string value that might contain both a number and a unit.
-    Converts numbers from comma to dot decimal.
-    Returns a dictionary {'value': float_or_none, 'unit': str_or_none}.
-    """
     if not isinstance(value_str, str):
         return {'value': None, 'unit': None}
     
@@ -44,7 +39,6 @@ def _safe_parse_value(value_str):
         except ValueError:
             return {'value': None, 'unit': unit_str}
     
-    # If no number is found, return the original string as a potential unit/label
     return {'value': None, 'unit': value_str if value_str else None}
 
 
@@ -71,7 +65,7 @@ def parse_kistler_csv(file_path):
     for key in essential_keys:
         data["result_info"][key] = data["result_info"].get(key, "N/A")
 
-    data["result_info"]["Entry"] = "N/A" # Default if not found
+    data["result_info"]["Entry"] = "N/A"
 
     pv_eo_related_block_match = re.search(
         r"Process values - EO related\n(.*?)(?=\n\nEvaluation objects settings|\n\nSwitch signal settings|\n\nDevice information)",
@@ -89,7 +83,7 @@ def parse_kistler_csv(file_path):
             try:
                 entry_col_index = headers.index("Entry")
             except ValueError:
-                entry_col_index = -1 # 'Entry' header not found
+                entry_col_index = -1
 
             if entry_col_index != -1:
                 for line_idx, line in enumerate(lines[2:]):
